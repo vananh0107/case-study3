@@ -1,35 +1,46 @@
 package com.example.backend.security;
 
+import com.example.backend.pojo.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class UserPrinciple implements UserDetails {
-    private final Integer id;
-    private final String email;
-    private final String password;
-    private final Collection<? extends GrantedAuthority> authorities;
+    @Serial
+    private static final long serialVersionUID = 1L;
 
-    public UserPrinciple(Integer id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    private final Integer id;
+
+    private final String userName;
+
+    private final String password;
+
+    private Collection<? extends GrantedAuthority> roles;
+
+    public UserPrinciple(Integer id, String password, String userName,
+                         Collection<? extends GrantedAuthority> roles) {
         this.id = id;
-        this.email = email;
+        this.userName = userName;
         this.password = password;
-        this.authorities = authorities;
+        this.roles = roles;
     }
 
     public static UserPrinciple build(User user) {
-        // Chuyển đổi role từ String sang SimpleGrantedAuthority để tương thích với Spring Security
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase());
+        List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
+                new SimpleGrantedAuthority(role.getName())
+        ).collect(Collectors.toList());
+
         return new UserPrinciple(
                 user.getId(),
-                user.getEmail(),
                 user.getPassword(),
-                Collections.singletonList(authority)
+                user.getUsername(),
+                authorities
         );
     }
 
@@ -39,7 +50,7 @@ public class UserPrinciple implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return userName;
     }
 
     @Override
@@ -49,8 +60,9 @@ public class UserPrinciple implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        return roles;
     }
+
 
     @Override
     public boolean isAccountNonExpired() {
@@ -75,13 +87,14 @@ public class UserPrinciple implements UserDetails {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof UserPrinciple)) return false;
-        UserPrinciple that = (UserPrinciple) o;
-        return Objects.equals(id, that.id);
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserPrinciple user = (UserPrinciple) o;
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return super.hashCode();
     }
 }

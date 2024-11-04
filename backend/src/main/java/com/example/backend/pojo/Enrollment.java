@@ -16,5 +16,4 @@ public class Enrollment {
     private Course course;
 
     private boolean active = true;
-
 }
