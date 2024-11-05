@@ -6,6 +6,7 @@ import com.example.backend.repo.RoleRepository;
 import com.example.backend.repo.UserRepository;
 import com.example.backend.security.UserPrinciple;
 import com.example.backend.security.dto.UserRegisterDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,9 +16,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class UserService implements UserDetailsService {
     @Autowired
@@ -44,14 +46,22 @@ public class UserService implements UserDetailsService {
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userOptional = userRepository.findByUsername(username);
+        Optional<User> userOptional = userRepository.findByUsernameWithRoles(username);
         if (userOptional.isEmpty()) {
             throw new UsernameNotFoundException(username);
+        }
+        else {
+            User user = userOptional.get();
+            List<Role> roles = roleRepository.findRolesByUserId(user.getId());
+            Set<Role> setRoles = roles.stream()
+                    .peek(role -> role.setName("ROLE_" + role.getName().toUpperCase()))
+                    .collect(Collectors.toSet());
+            user.setRoles(setRoles);
         }
         return UserPrinciple.build(userOptional.get());
     }
 
     public Optional<User> findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsernameWithRoles(username);
     }
 }

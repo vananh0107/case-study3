@@ -1,19 +1,21 @@
 package com.example.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
-
 @Data
 public class CourseDTO {
-
-    private Integer id;
-
+    @NotBlank(message = "Name is required")
     private String name;
 
+    @NotBlank(message = "Description is required")
     private String description;
 
-    private int maxStudents;
+    @NotNull(message = "Max students is required")
+    private Integer maxStudents;
 
+    @NotNull(message = "Start date is required")
     private LocalDate startDate;
 }

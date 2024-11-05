@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/", "/login","/register").permitAll()
-//                        .requestMatchers("/api/**").hasRole("CLIENT")
+                        .requestMatchers("/api/teacher/**").hasRole("TEACHER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -51,5 +51,4 @@ public class SecurityConfig {
                 .logout(LogoutConfigurer::permitAll);
         return http.build();
     }
-
 }

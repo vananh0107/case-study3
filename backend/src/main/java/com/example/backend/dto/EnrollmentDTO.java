@@ -11,4 +11,5 @@ public class EnrollmentDTO {
     private Integer courseId;
 
     private boolean active;
+
 }
