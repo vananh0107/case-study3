@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.CourseDTO;
+import com.example.backend.dto.CourseRegisterDTO;
 import com.example.backend.dto.WeeklyEnrollmentDTO;
 import com.example.backend.dto.StudentDTO;
 import com.example.backend.pojo.Course;
@@ -11,8 +12,11 @@ import com.example.backend.repo.EnrollmentRepository;
 import com.example.backend.repo.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
@@ -59,11 +63,8 @@ public class CourseService {
         courseRepository.deleteById(courseId);
     }
 
-    public List<CourseDTO> getAllCourses() {
-        List<Course> courses = courseRepository.findAll();
-        return courses.stream()
-                .map(course -> modelMapper.map(course, CourseDTO.class))
-                .collect(Collectors.toList());
+    public Page<CourseRegisterDTO> getAllCoursesWithEnrollmentCount(int page, int size) {
+        return courseRepository.findAllCoursesWithEnrollmentCount(PageRequest.of(page, size));
     }
 
     public CourseDTO getCourseById(Integer courseId) {
@@ -79,7 +80,7 @@ public class CourseService {
             throw new IllegalStateException("Course is full");
         }
 
-        User student = userRepository.findByUsernameWithRoles(username)
+        User student = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User " + username + " not found"));
 
         Optional<Enrollment> existingEnrollmentOpt = enrollmentRepository.findByStudentAndCourse(student, course);
@@ -91,7 +92,7 @@ public class CourseService {
                 existingEnrollment.setRegistrationDate(LocalDate.now());
                 enrollmentRepository.save(existingEnrollment);
             } else {
-                throw new IllegalArgumentException("User is already registered for this course");
+                throw new IllegalArgumentException("You are already registered for "+course.getName() +" course");
             }
         } else {
             Enrollment enrollment = new Enrollment();
@@ -101,13 +102,15 @@ public class CourseService {
             enrollmentRepository.save(enrollment);
         }
     }
-
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
+    }
     public void unregisterCourse(Integer courseId, String username) {
         Optional<Course> courseOpt = courseRepository.findById(courseId);
         if (courseOpt.isPresent()) {
             Course course = courseOpt.get();
             if (LocalDate.now().isBefore(course.getStartDate())) {
-                User student = userRepository.findByUsernameWithRoles(username)
+                User student = userRepository.findByUsername(username)
                         .orElseThrow(() -> new NoSuchElementException("User " + username + " not found"));
                 Enrollment enrollment = enrollmentRepository.findByStudentAndCourse(student, course)
                         .orElseThrow(() -> new NoSuchElementException("Not enrolled in this course"));
@@ -138,16 +141,29 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    public List<CourseDTO> getActiveCoursesForUser(String username) {
-        User student = userRepository.findByUsernameWithRoles(username)
+    public List<CourseRegisterDTO> getActiveCoursesForUser(String username) {
+        User student = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
         List<Enrollment> activeEnrollments = enrollmentRepository.findByStudentAndActiveTrue(student);
+        List<CourseRegisterDTO> courseRegisterDTOs = new ArrayList<>();
 
-        return activeEnrollments.stream()
-                .map(enrollment -> modelMapper.map(enrollment.getCourse(), CourseDTO.class))
-                .collect(Collectors.toList());
+        for (Enrollment enrollment : activeEnrollments) {
+            Course course = enrollment.getCourse();
+
+            Long currentStudentCount = enrollmentRepository.countEnrollmentsByCourseId(course.getId());
+
+            CourseRegisterDTO dto = new CourseRegisterDTO(
+                    course.getId(),
+                    course.getName(),
+                    course.getDescription(),
+                    course.getMaxStudents(),
+                    course.getStartDate(),
+                    currentStudentCount
+            );
+            courseRegisterDTOs.add(dto);
+        }
+        return courseRegisterDTOs;
     }
-
 }
 

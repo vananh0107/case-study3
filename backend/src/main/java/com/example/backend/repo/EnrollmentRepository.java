@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface EnrollmentRepository extends JpaRepository<Enrollment,Integer> {
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId AND e.active = true")
-    int countEnrollmentsByCourseId(@Param("courseId") Integer courseId);
+    Long countEnrollmentsByCourseId(@Param("courseId") Integer courseId);
 
     List<Enrollment> findByStudent(User student);
 
@@ -32,4 +32,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment,Integer> 
 
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.course.id = :courseId AND e.registrationDate BETWEEN :startDate AND :endDate")
     Long countEnrollmentsByCourseIdAndRegistrationDateBetween(@Param("courseId") Integer courseId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    List<Enrollment> findByRegistrationDateBetweenAndActive(LocalDate startDate, LocalDate endDate, boolean active);
+
 }

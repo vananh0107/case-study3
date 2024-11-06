@@ -8,19 +8,18 @@ import com.example.backend.pojo.User;
 import com.example.backend.repo.CourseRepository;
 import com.example.backend.repo.EnrollmentRepository;
 import com.example.backend.repo.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class EnrollmentService {
 
     @Autowired
@@ -34,69 +33,83 @@ public class EnrollmentService {
     @Autowired
     private CourseRepository courseRepository;
 
-    public List<CourseDTO> getRegisteredCourses(String username) {
-        User student = userRepository.findByUsernameWithRoles(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        List<Enrollment> enrollments = enrollmentRepository.findByStudent(student);
+    public long countCurrentStudentsForCourse(Integer courseId) {
+        return enrollmentRepository.countEnrollmentsByCourseId(courseId);
+    }
+
+    public Map<Course, Long> getWeeklyEnrollmentReport(LocalDate startDate, LocalDate endDate) {
+        List<Enrollment> enrollments = enrollmentRepository.findByRegistrationDateBetweenAndActive(startDate, endDate, true);
+
         return enrollments.stream()
-                .map(enrollment -> modelMapper.map(enrollment.getCourse(), CourseDTO.class))
-                .collect(Collectors.toList());
+                .collect(Collectors.groupingBy(Enrollment::getCourse, Collectors.counting()));
     }
 
-    public void cancelRegistration(Integer courseId, String username) {
-        User student = userRepository.findByUsernameWithRoles(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
-        Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentAndCourse(student, course);
-        if (enrollmentOpt.isPresent() && enrollmentOpt.get().getCourse().getStartDate().isAfter(LocalDate.now())) {
-            enrollmentRepository.delete(enrollmentOpt.get());
-        } else {
-            throw new RuntimeException("Cannot cancel registration");
-        }
-
-    }
-    public List<WeeklyEnrollmentDTO> getWeeklyEnrollmentStatsUntilNow() {
-        LocalDate earliestRegistrationDate = enrollmentRepository.findEarliestRegistrationDate();
-
-        // Kiểm tra nếu không có người đăng ký
-        if (earliestRegistrationDate == null) {
-            throw new NoSuchElementException("No registrations found.");
-        }
-
-        LocalDate today = LocalDate.now();
-        LocalDate startOfWeek = today.with(DayOfWeek.MONDAY).minusWeeks(1); // Đến tuần trước
-
-        List<WeeklyEnrollmentDTO> stats = new ArrayList<>();
-
-        // Tính toán các tuần từ ngày đầu tiên có người đăng ký
-        LocalDate currentStartDate = earliestRegistrationDate;
-
-        while (currentStartDate.isBefore(startOfWeek)) {
-            LocalDate currentEndDate = currentStartDate.with(DayOfWeek.SUNDAY); // Chủ Nhật của tuần hiện tại
-            if (currentEndDate.isAfter(startOfWeek)) {
-                currentEndDate = startOfWeek; // Giới hạn ở tuần trước
-            }
-
-            List<Course> courses = courseRepository.findAll();
-
-            for (Course course : courses) {
-                Long enrollmentCount = enrollmentRepository.countEnrollmentsByCourseIdAndRegistrationDateBetween(
-                        course.getId(), currentStartDate, currentEndDate);
-
-                stats.add(new WeeklyEnrollmentDTO(
-                        course.getId(),
-                        course.getName(),
-                        enrollmentCount != null ? enrollmentCount : 0,
-                        currentStartDate,
-                        currentEndDate
-                ));
-            }
-
-            // Tiến đến tuần tiếp theo
-            currentStartDate = currentStartDate.plusWeeks(1);
-        }
-
-        return stats;
-    }
+//    public List<CourseDTO> getRegisteredCourses(String username) {
+//        User student = userRepository.findByUsernameWithRoles(username)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//        List<Enrollment> enrollments = enrollmentRepository.findByStudent(student);
+//        return enrollments.stream()
+//                .map(enrollment -> modelMapper.map(enrollment.getCourse(), CourseDTO.class))
+//                .collect(Collectors.toList());
+//    }
+//
+//    public void cancelRegistration(Integer courseId, String username) {
+//        User student = userRepository.findByUsernameWithRoles(username)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//        Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
+//        Optional<Enrollment> enrollmentOpt = enrollmentRepository.findByStudentAndCourse(student, course);
+//        if (enrollmentOpt.isPresent() && enrollmentOpt.get().getCourse().getStartDate().isAfter(LocalDate.now())) {
+//            enrollmentRepository.delete(enrollmentOpt.get());
+//        } else {
+//            throw new RuntimeException("Cannot cancel registration");
+//        }
+//
+//    }
+//    public List<WeeklyEnrollmentDTO> getWeeklyEnrollmentStatsUntilNow() {
+//        LocalDate earliestRegistrationDate = enrollmentRepository.findEarliestRegistrationDate();
+//        // Nếu không có người đăng ký, ném ngoại lệ
+//        if (earliestRegistrationDate == null) {
+//            throw new NoSuchElementException("No registrations found.");
+//        }
+//
+//        LocalDate today = LocalDate.now();
+//        // Đặt startOfWeek là Chủ Nhật của tuần trước
+//        LocalDate startOfWeek = today.with(DayOfWeek.SUNDAY).minusWeeks(1);
+//
+//        List<WeeklyEnrollmentDTO> stats = new ArrayList<>();
+//
+//        // Khởi tạo currentEndDate từ Chủ Nhật của tuần trước
+//        LocalDate currentEndDate = startOfWeek;
+//
+//        while (currentEndDate.isAfter(earliestRegistrationDate) || currentEndDate.isEqual(earliestRegistrationDate)) {
+//            // currentStartDate là thứ Hai của tuần hiện tại
+//            LocalDate currentStartDate = currentEndDate.with(DayOfWeek.MONDAY);
+//            if (currentStartDate.isBefore(earliestRegistrationDate)) {
+//                currentStartDate = earliestRegistrationDate; // Giới hạn bắt đầu từ earliestRegistrationDate nếu vượt qua
+//            }
+//
+//            log.info("currentStartDate: " + currentStartDate + ", currentEndDate: " + currentEndDate);
+//
+//            // Lấy danh sách các khóa học và tính toán số lượt đăng ký cho từng khóa học
+//            List<Course> courses = courseRepository.findAll();
+//            for (Course course : courses) {
+//                Long enrollmentCount = enrollmentRepository.countEnrollmentsByCourseIdAndRegistrationDateBetween(
+//                        course.getId(), currentStartDate, currentEndDate);
+//
+//                stats.add(new WeeklyEnrollmentDTO(
+//                        course.getId(),
+//                        course.getName(),
+//                        enrollmentCount != null ? enrollmentCount : 0,
+//                        currentStartDate,
+//                        currentEndDate
+//                ));
+//            }
+//
+//            // Giảm currentEndDate xuống một tuần (về Chủ Nhật của tuần trước)
+//            currentEndDate = currentEndDate.minusWeeks(1);
+//        }
+//
+//        return stats;
+//    }
 }
 

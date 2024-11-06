@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Enrollment Report</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">Weekly Enrollment Report</h1>
+
+    <!-- Week Selection Form -->
+    <form method="get" action="/weekly-report">
+        <div class="row mb-3">
+            <div class="col">
+                <label for="weekOption">Select Week</label>
+                <select id="weekOption" name="weekOption" class="form-control">
+                    <option value="0" th:selected="${weekOption == '0'}">Current Week ({{startDate}} to {{endDate}})</option>
+                    <option value="1" th:selected="${weekOption == '1'}">1 week ago ({{startDate.minusWeeks(1)}} to {{endDate.minusWeeks(1)}})</option>
+                    <option value="2" th:selected="${weekOption == '2'}">2 weeks ago ({{startDate.minusWeeks(2)}} to {{endDate.minusWeeks(2)}})</option>
+                    <option value="3" th:selected="${weekOption == '3'}">3 weeks ago ({{startDate.minusWeeks(3)}} to {{endDate.minusWeeks(3)}})</option>
+                    <option value="4" th:selected="${weekOption == '4'}">4 weeks ago ({{startDate.minusWeeks(4)}} to {{endDate.minusWeeks(4)}})</option>
+                </select>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary mt-4">Generate Report</button>
+            </div>
+        </div>
+    </form>
+
+    <h3 class="mt-4">Report from <span th:text="${startDate}"></span> to <span th:text="${endDate}"></span></h3>
+
+    <table class="table table-bordered mt-3">
+        <thead>
+        <tr>
+            <th>Course Name</th>
+            <th>Number of Students Registered</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="entry : ${reportData}">
+            <td th:text="${entry.key.name}">Course Name</td>
+            <td th:text="${entry.value}">0</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.5/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

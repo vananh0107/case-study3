@@ -11,7 +11,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
-    @EntityGraph(attributePaths = "roles")
-    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.username = :username")
-    Optional<User> findByUsernameWithRoles(@Param("username") String username);
+//    @EntityGraph(attributePaths = "roles")
+//    @Query("SELECT u FROM User u JOIN FETCH u.roles WHERE u.username = :username")
+//    Optional<User> findByUsernameWithRoles(@Param("username") String username);
+    Optional<User> findByUsername(String username);
+
 }
