@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Integer> {
@@ -18,5 +20,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             "GROUP BY c.id, c.name, c.description, c.maxStudents, c.startDate " +
             "ORDER BY c.startDate")
     Page<CourseRegisterDTO> findAllCoursesWithEnrollmentCount(Pageable pageable);
-
+    @Query("SELECT c FROM Course c WHERE c.maxStudents > (SELECT COUNT(e) FROM Enrollment e WHERE e.course = c AND e.active = true)")
+    List<Course> findCoursesWithLowEnrollment();
 }

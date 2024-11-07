@@ -34,11 +34,11 @@ public class EnrollmentController {
         model.addAttribute("role", "student");
         return "courses/list";
     }
-    @PostMapping("/student/courses/register")
-    public String registerCourse(@RequestParam("courseId") Integer courseId,
+    @PostMapping("/student/courses/register/{id}")
+    public String registerCourse(@PathVariable("id") Integer courseId,
                                  Principal principal,
                                  RedirectAttributes redirectAttributes) {
-        String username = principal.getName();  // Get logged-in user's username
+        String username = principal.getName();
         try {
             courseService.registerCourse(courseId, username);
             redirectAttributes.addFlashAttribute("message", "Register courses successful!");
@@ -50,7 +50,7 @@ public class EnrollmentController {
             redirectAttributes.addFlashAttribute("message", e.getMessage());
         }
 
-        return "redirect:/student/courses/register";
+        return "redirect:/student/courses/list";
     }
     @PostMapping("/student/courses/unregister")
     public String unregisterCourse(@RequestParam("courseId") Integer courseId, Principal principal, RedirectAttributes redirectAttributes) {

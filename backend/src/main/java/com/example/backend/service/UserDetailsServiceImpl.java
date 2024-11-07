@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.repo.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,9 +20,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         com.example.backend.pojo.User userSystem = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-//        if (!userSystem.getActive()) {
-//            throw new InternalAuthenticationServiceException("User account is not active");
-//        }
+        if (!userSystem.isVerifiedEmail()) {
+            throw new InternalAuthenticationServiceException("Account is not verify");
+        }
         return User.withUsername(userSystem.getUsername())
                 .password(userSystem.getPassword())
                 .authorities(AuthorityUtils.createAuthorityList(userSystem.getRole()))

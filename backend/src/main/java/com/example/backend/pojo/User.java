@@ -28,4 +28,6 @@ public class User {
     private String role;
     @Column(nullable = false)
     private boolean verifiedEmail = false;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Verify verify;
 }

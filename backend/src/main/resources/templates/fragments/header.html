@@ -1,0 +1,33 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <link rel="stylesheet" th:href="@{/css/global.css}">
+</head>
+<header th:fragment="header">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container px-4">
+      <span class="navbar-brand" >ABC University</span>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" th:if="${role == 'teacher'|| role=='ROLE_TEACHER'}" href="/teacher/courses/list">Danh sách khóa học</a>
+            <a class="nav-link" th:if="${role == 'student'|| role=='ROLE_STUDENT'}" href="/student/courses/list">Danh sách khóa học</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" th:if="${role == 'teacher'|| role=='ROLE_TEACHER'}" href="/teacher/courses/weekly-report">Báo cáo hàng tuần</a>
+            <a class="nav-link" th:if="${role == 'student'|| role=='ROLE_STUDENT'}" href="/student/courses/my">Các khóa học đã đăng ký</a>
+          </li>
+        </ul>
+        <div class="dropdown">
+          <button class="dropbtn" th:text="${username}"></button>
+          <div class="dropdown-content">
+            <a th:if="${employeeId != null}" th:href="@{/user/employees/view/{id}(id=${employeeId})}">Khóa học đã đăng ký</a>
+            <form th:action="@{/logout}" method="post">
+              <button type="submit" class="dropdown-item">Đăng xuất</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+</html>

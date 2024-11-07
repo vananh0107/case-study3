@@ -1,10 +1,9 @@
 package com.example.backend.controller;
 
-import com.example.backend.pojo.Course;
+import com.example.backend.dto.CourseDTO;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +25,7 @@ public class ReportController {
     @Autowired
     private CourseService courseService;
 
-    @GetMapping("/weekly-report")
+    @GetMapping("/teacher/courses/weekly-report")
     public String getWeeklyReport(@RequestParam(value = "weekOption", required = false, defaultValue = "0") String weekOption,
                                   Model model) {
         LocalDate endDate = LocalDate.now();
@@ -46,11 +45,10 @@ public class ReportController {
             endDate = startDate.plusDays(6);
         }
 
-        Map<Course, Long> reportData = enrollmentService.getWeeklyEnrollmentReport(startDate, endDate);
+        Map<CourseDTO, Long> reportData = enrollmentService.getWeeklyEnrollmentReport(startDate, endDate);
 
         model.addAttribute("weekRanges", weekRanges);
         model.addAttribute("reportData", reportData);
-        model.addAttribute("courses", courseService.getAllCourses());
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("weekOption", weekOption);

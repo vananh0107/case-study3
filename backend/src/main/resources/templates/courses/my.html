@@ -3,6 +3,8 @@
 <head>
   <title>Các Khóa Học Đã Đăng Ký</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" th:href="@{/css/global.css}">
+
   <script>
     function checkUnregisterStatus() {
       const rows = document.querySelectorAll('tr.course-row');
@@ -21,6 +23,7 @@
     window.onload = checkUnregisterStatus;
   </script>
 </head>
+<header th:replace="~{fragments/header :: header}"></header>
 <body>
 <div class="container mt-4">
   <h1 class="mb-4 text-center">Các Khóa Học Đã Đăng Ký</h1>

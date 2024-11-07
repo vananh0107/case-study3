@@ -80,9 +80,7 @@ public class CourseController {
     @GetMapping("/student/courses/my")
     public String getCoursesForUser(Model model, Principal principal) {
         String username = principal.getName();
-
         List<CourseRegisterDTO> enrolledCourses = courseService.getActiveCoursesForUser(username);
-
         model.addAttribute("enrollments", enrolledCourses);
         return "courses/my";
     }

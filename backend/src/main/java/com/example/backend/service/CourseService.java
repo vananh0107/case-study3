@@ -2,7 +2,6 @@ package com.example.backend.service;
 
 import com.example.backend.dto.CourseDTO;
 import com.example.backend.dto.CourseRegisterDTO;
-import com.example.backend.dto.WeeklyEnrollmentDTO;
 import com.example.backend.dto.StudentDTO;
 import com.example.backend.pojo.Course;
 import com.example.backend.pojo.Enrollment;
@@ -16,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -102,8 +99,9 @@ public class CourseService {
             enrollmentRepository.save(enrollment);
         }
     }
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+    public List<CourseDTO> getAllCourses() {
+        List<Course> courses= courseRepository.findAll();
+        return courses.stream().map(course -> modelMapper.map(course, CourseDTO.class)).collect(Collectors.toList());
     }
     public void unregisterCourse(Integer courseId, String username) {
         Optional<Course> courseOpt = courseRepository.findById(courseId);
