@@ -5,21 +5,19 @@ import com.example.backend.dto.CourseRegisterDTO;
 import com.example.backend.dto.StudentDTO;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
-import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.List;
-
+@Slf4j
 @Controller
 public class CourseController {
 
@@ -67,14 +65,16 @@ public class CourseController {
     }
 
     @PostMapping("/teacher/courses/edit/{id}")
-    public String editCourse(@PathVariable("id") Integer id, @ModelAttribute("course") CourseDTO courseDTO) {
+    public String editCourse(@PathVariable("id") Integer id, @ModelAttribute("course") CourseDTO courseDTO, RedirectAttributes redirectAttribute) {
         courseService.updateCourse(id, courseDTO);
+        redirectAttribute.addFlashAttribute("message", "Cập nhật khóa học "+courseDTO.getName()+" thành công!!!");
         return "redirect:/teacher/courses/list";
     }
 
     @PostMapping("/teacher/courses/delete/{id}")
-    public String deleteCourse(@PathVariable Integer id) {
+    public String deleteCourse(@PathVariable Integer id, RedirectAttributes redirectAttribute) {
         courseService.deleteCourse(id);
+        redirectAttribute.addFlashAttribute("message", "Xóa khóa học thành công!!!");
         return "redirect:/teacher/courses/list";
     }
     @GetMapping("/student/courses/my")
@@ -92,7 +92,7 @@ public class CourseController {
         try {
             courseService.addCourse(courseDTO);
             model.addAttribute("message", "Khóa học đã được thêm thành công!");
-            return "redirect:/admin/courses";
+            return "redirect:/teacher/courses/list";
         } catch (Exception e) {
             model.addAttribute("error", "Đã có lỗi xảy ra khi thêm khóa học!");
             return "courses/create";

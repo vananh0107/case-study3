@@ -42,7 +42,7 @@ public class CourseService {
 
     public CourseDTO updateCourse(Integer courseId, CourseDTO courseDTO) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new NoSuchElementException("Course with ID " + courseId + " not found"));
+                .orElseThrow(() -> new NoSuchElementException("Khóa học với ID: " + courseId + " không tìm thấy"));
 
         course.setName(courseDTO.getName());
         course.setDescription(courseDTO.getDescription());
@@ -55,7 +55,7 @@ public class CourseService {
 
     public void deleteCourse(Integer courseId) {
         if (!courseRepository.existsById(courseId)) {
-            throw new NoSuchElementException("Course with ID " + courseId + " not found");
+            throw new NoSuchElementException("Khóa học với ID: " + courseId + " không tìm thấy");
         }
         courseRepository.deleteById(courseId);
     }
@@ -65,20 +65,20 @@ public class CourseService {
     }
 
     public CourseDTO getCourseById(Integer courseId) {
-        Course course = courseRepository.findById(courseId).orElseThrow(() -> new NoSuchElementException("Course with ID " + courseId + " not found"));
+        Course course = courseRepository.findById(courseId).orElseThrow(() -> new NoSuchElementException("Khóa học với ID: " + courseId + " không tìm thấy"));
         return modelMapper.map(course, CourseDTO.class);
     }
 
     public void registerCourse(Integer courseId, String username) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new NoSuchElementException("Course with ID " + courseId + " not found"));
+                .orElseThrow(() -> new NoSuchElementException("Khóa học với ID: " + courseId + " không tìm thấy"));
 
         if (enrollmentRepository.countEnrollmentsByCourseId(courseId) >= course.getMaxStudents()) {
-            throw new IllegalStateException("Course is full");
+            throw new IllegalStateException("Khóa học đã đầy");
         }
 
         User student = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NoSuchElementException("User " + username + " not found"));
+                .orElseThrow(() -> new NoSuchElementException("User " + username + " không tìm thấy"));
 
         Optional<Enrollment> existingEnrollmentOpt = enrollmentRepository.findByStudentAndCourse(student, course);
 
@@ -89,7 +89,7 @@ public class CourseService {
                 existingEnrollment.setRegistrationDate(LocalDate.now());
                 enrollmentRepository.save(existingEnrollment);
             } else {
-                throw new IllegalArgumentException("You are already registered for "+course.getName() +" course");
+                throw new IllegalArgumentException("Bạn đã đăng kí khóa học: "+course.getName());
             }
         } else {
             Enrollment enrollment = new Enrollment();
@@ -99,32 +99,29 @@ public class CourseService {
             enrollmentRepository.save(enrollment);
         }
     }
-    public List<CourseDTO> getAllCourses() {
-        List<Course> courses= courseRepository.findAll();
-        return courses.stream().map(course -> modelMapper.map(course, CourseDTO.class)).collect(Collectors.toList());
-    }
+
     public void unregisterCourse(Integer courseId, String username) {
         Optional<Course> courseOpt = courseRepository.findById(courseId);
         if (courseOpt.isPresent()) {
             Course course = courseOpt.get();
             if (LocalDate.now().isBefore(course.getStartDate())) {
                 User student = userRepository.findByUsername(username)
-                        .orElseThrow(() -> new NoSuchElementException("User " + username + " not found"));
+                        .orElseThrow(() -> new NoSuchElementException("User " + username + " không tìm thấy"));
                 Enrollment enrollment = enrollmentRepository.findByStudentAndCourse(student, course)
-                        .orElseThrow(() -> new NoSuchElementException("Not enrolled in this course"));
+                        .orElseThrow(() -> new NoSuchElementException("Chưa đăng ký khóa học này"));
 
                 enrollment.setActive(false);
                 enrollmentRepository.save(enrollment);
             } else {
-                throw new IllegalStateException("Cannot unregister, course has already started");
+                throw new IllegalStateException("Không thể hủy, khóa học đã bắt đầu");
             }
         } else {
-            throw new NoSuchElementException("Course with ID " + courseId + " not found");
+            throw new NoSuchElementException("Khóa học với ID: " + courseId + " không tìm thấy");
         }
     }
     public List<StudentDTO> getStudentsByCourseId(Integer courseId) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new NoSuchElementException("Course with ID " + courseId + " not found"));
+                .orElseThrow(() -> new NoSuchElementException("Khóa học với ID: " + courseId + " không tìm thấy"));
 
         List<Enrollment> enrollments = enrollmentRepository.findByCourseAndActiveTrue(course);
         return enrollments.stream()
@@ -141,7 +138,7 @@ public class CourseService {
 
     public List<CourseRegisterDTO> getActiveCoursesForUser(String username) {
         User student = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NoSuchElementException("User not found"));
+                .orElseThrow(() -> new NoSuchElementException("Người dùng không tồn tại"));
 
         List<Enrollment> activeEnrollments = enrollmentRepository.findByStudentAndActiveTrue(student);
         List<CourseRegisterDTO> courseRegisterDTOs = new ArrayList<>();

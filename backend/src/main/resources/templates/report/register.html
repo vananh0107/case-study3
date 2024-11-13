@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly Enrollment Report</title>
+    <title>Thống kê số lượng đăng ký</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/global.css}">
 
@@ -11,12 +11,11 @@
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 <div class="container mt-5">
-    <h1 class="mb-4">Weekly Enrollment Report</h1>
-
+    <h1 class="mb-4">Thống kê số lượng đăng ký hàng tuần</h1>
     <form method="get" action="/teacher/courses/weekly-report">
         <div class="row align-items-end">
             <div class="col">
-                <label for="weekOption">Select Week</label>
+                <label for="weekOption">Chọn tuần</label>
                 <select id="weekOption" name="weekOption" class="form-control">
                     <th:block th:each="weekRange, iterStat : ${weekRanges}">
                         <option th:value="${iterStat.index}" th:text="${weekRange}" th:selected="${iterStat.index == weekOption}">
@@ -25,24 +24,29 @@
                 </select>
             </div>
             <div class="col">
-                <button type="submit" class="btn btn-primary">Generate Report</button>
+                <button type="submit" class="btn btn-primary">Tạo báo cáo</button>
             </div>
         </div>
     </form>
 
-    <h3 class="mt-4">
-        Report from <span th:text="${startDate}"></span> to <span th:text="${endDate}"></span>
+    <h3 class="mt-4 d-flex justify-content-between align-items-center">
+        <span th:text="'Thống kê từ ' + ${startDate} + ' đến ' + ${endDate}"></span>
+        <form method="get" action="/teacher/courses/export-weekly-report" class="mb-0">
+            <input type="hidden" name="startDate" th:value="${startDate}" />
+            <input type="hidden" name="endDate" th:value="${endDate}" />
+            <button type="submit" class="btn btn-success">Xuất ra file CSV</button>
+        </form>
     </h3>
     <table class="table table-bordered mt-3">
         <thead>
         <tr>
-            <th>Course Name</th>
-            <th>Number of Students Registered</th>
+            <th>Tên khóa học</th>
+            <th>Số lượng sinh viên đăng ký theo tuần</th>
         </tr>
         </thead>
         <tbody>
             <tr th:each="entry : ${reportData}">
-                <td th:text="${entry.key.name}">Course Name</td>
+                <td th:text="${entry.key.name}">Tên khóa học</td>
                 <td th:text="${entry.value}">0</td>
             </tr>
         </tbody>

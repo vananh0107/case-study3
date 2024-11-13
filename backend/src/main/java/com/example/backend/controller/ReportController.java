@@ -1,14 +1,25 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.CourseDTO;
-import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
+import com.example.backend.service.FileService;
+import org.springframework.core.io.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Controller
 public class ReportController {
 
@@ -23,7 +35,7 @@ public class ReportController {
     private EnrollmentService enrollmentService;
 
     @Autowired
-    private CourseService courseService;
+    private FileService fileService;
 
     @GetMapping("/teacher/courses/weekly-report")
     public String getWeeklyReport(@RequestParam(value = "weekOption", required = false, defaultValue = "0") String weekOption,
@@ -56,6 +68,24 @@ public class ReportController {
         return "report/register";
     }
 
+    @GetMapping("/teacher/courses/export-weekly-report")
+    @ResponseBody
+    public ResponseEntity<Resource> exportWeeklyReport(
+            @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) throws IOException {
+
+        Map<CourseDTO, Long> weeklyReportData = enrollmentService.getWeeklyEnrollmentReport(startDate, endDate);
+
+        Path path = Paths.get("weekly_report.csv");
+        fileService.reportCoursesReport(weeklyReportData, startDate, endDate);
+
+        Resource resource = new FileSystemResource(path);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=weekly_report.csv")
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(resource);
+    }
 
 }
 

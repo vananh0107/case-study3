@@ -3,7 +3,6 @@ package com.example.backend.controller;
 import com.example.backend.dto.CourseRegisterDTO;
 import com.example.backend.service.CourseService;
 import com.example.backend.service.EnrollmentService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -41,13 +40,13 @@ public class EnrollmentController {
         String username = principal.getName();
         try {
             courseService.registerCourse(courseId, username);
-            redirectAttributes.addFlashAttribute("message", "Register courses successful!");
+            redirectAttributes.addFlashAttribute("message", "Đăng kí khóa học thành công!");
         } catch (NoSuchElementException e) {
-            redirectAttributes.addFlashAttribute("message", "Course or user not found!");
+            redirectAttributes.addFlashAttribute("message", "Không tìm thấy khóa học!");
         } catch (IllegalStateException e) {
-            redirectAttributes.addFlashAttribute("message", "Course is full, you can't register course!");
+            redirectAttributes.addFlashAttribute("message", "Khóa học đã đầy bạn không thể đăng ký!");
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("message", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
 
         return "redirect:/student/courses/list";

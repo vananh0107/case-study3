@@ -23,6 +23,15 @@
     }
   </style>
   <header th:replace="~{fragments/header :: header}"></header>
+  <script>
+    function confirmDelete(event, courseName) {
+      event.preventDefault();
+      var courseName = event.target.getAttribute('data-course-name');
+      if (confirm("Bạn có chắc chắn muốn xóa khóa học '" + courseName + "' không?")) {
+        event.target.closest("form").submit();
+      }
+    }
+  </script>
 </head>
 <body>
 <div class="mx-5 mt-4">
@@ -35,6 +44,9 @@
 
   <div th:if="${message}" class="alert alert-info" role="alert">
     <span th:text="${message}"></span>
+  </div>
+  <div th:if="${error}" class="alert alert-danger" role="alert" >
+    <span th:text="${error}"></span>
   </div>
 
   <div th:if="${coursePage.content.size() > 0}">
@@ -72,7 +84,9 @@
             <a th:href="@{/teacher/courses/detail/{id}(id=${course.id})}" class="btn btn-info mb-1 mr-2 flex-1">Chi tiết</a>
             <form th:action="@{/teacher/courses/delete/{id}(id=${course.id})}" method="post" style="display:inline;">
               <input type="hidden" th:name="courseId" th:value="${course.id}">
-              <button type="submit" class="btn btn-danger">Xóa</button>
+              <button type="submit" class="btn btn-danger"
+                      th:data-course-name="${course.name}"
+                      th:onclick="|confirmDelete(event)|">Xóa</button>
             </form>
           </div>
         </td>

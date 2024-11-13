@@ -35,24 +35,30 @@ public class UserService {
         user.setFullName(userRegisterDTO.getFullName());
         user.setUsername(userRegisterDTO.getUsername());
         user.setPassword(new BCryptPasswordEncoder().encode(userRegisterDTO.getPassword()));
-        user.setRole("ROLE_USER");
+        user.setRole("ROLE_STUDENT");
         user.setVerifiedEmail(false);
         userRepository.save(user);
         generateVerificationCode(user);
     }
+
     public void generateVerificationCode(User user) {
+        Verify existingVerify = verifyRepository.findByUser(user);
         String code = String.format("%05d", new Random().nextInt(100000));
         LocalDateTime expiryDate = LocalDateTime.now().plusMinutes(10);
-
-        Verify verify = new Verify();
-        verify.setCode(code);
-        verify.setExpiryDate(expiryDate);
-        verify.setUser(user);
-
-        verifyRepository.save(verify);
-
-        emailService.sendEmail(user.getUsername(),"Code for verify" ,code);
+        if (existingVerify != null) {
+            existingVerify.setCode(code);
+            existingVerify.setExpiryDate(expiryDate);
+            verifyRepository.save(existingVerify);
+        } else {
+            Verify newVerify = new Verify();
+            newVerify.setCode(code);
+            newVerify.setExpiryDate(expiryDate);
+            newVerify.setUser(user);
+            verifyRepository.save(newVerify);
+        }
+        emailService.sendEmail(user.getUsername(), "Code for verify", code);
     }
+
     @Transactional
     public boolean verifyCode(User user, String code) {
         Verify verify = verifyRepository.findByUser(user);

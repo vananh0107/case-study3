@@ -26,31 +26,28 @@ public class VerifyController {
 
     @PostMapping
     public String verifyCode(@RequestParam("code") String code,  Model model,HttpSession session) {
-        String userEmail = (String) session.getAttribute("userEmail");
+        String userEmail = (String) session.getAttribute("username");
         Optional<User> user = userService.findByUsername(userEmail);
         boolean isVerified = userService.verifyCode(user.get(), code);
         if (isVerified) {
-            session.removeAttribute("userEmail");
+            session.removeAttribute("username");
             session.removeAttribute("user");
             return "redirect:/login";
         } else {
-            model.addAttribute("error", "Invalid or expired code");
+            model.addAttribute("error", "Mã bạn vừa điền không đúng");
             return "verify";
         }
     }
     @PostMapping("/resend")
     public String resendVerification(HttpSession session, RedirectAttributes redirectAttributes) {
-        User user = (User) session.getAttribute("user");
-        log.info("resendVerification");
-        log.info(user.toString());
-        log.info(user.isVerifiedEmail()?"Verified":"Not Verified");
-        if (user != null && !user.isVerifiedEmail()) {
-            userService.generateVerificationCode(user);
-            redirectAttributes.addFlashAttribute("message", "A new verification code has been sent to your email.");
+        String username = (String) session.getAttribute("username");
+        Optional<User> user = userService.findByUsername(username);
+        if (user != null && !user.get().isVerifiedEmail()) {
+            userService.generateVerificationCode(user.get());
+            redirectAttributes.addFlashAttribute("message", "Mã xác minh mới đã được chuyển đến mail của bạn.");
         } else {
-            redirectAttributes.addFlashAttribute("error", "Unable to resend the verification code.");
+            redirectAttributes.addFlashAttribute("error", "Không thể gửi mã xác nhận đến mail của bạn.");
         }
-
         return "redirect:/verify";
     }
 

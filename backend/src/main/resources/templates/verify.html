@@ -37,12 +37,12 @@
 <body>
 <div class="verification-container">
   <h2 class="text-center">Email Verification</h2>
-  <p class="text-muted text-center">Enter the 5-digit code sent to your email</p>
+  <p class="text-muted text-center">Nhập mã gồm 5 chữ số được gửi tới email của bạn</p>
 
   <form th:action="@{/verify}" method="post">
     <div class="form-group">
       <label for="code">Verification Code</label>
-      <input type="text" class="form-control" id="code" name="code" placeholder="Enter your 5-digit code" required>
+      <input type="text" class="form-control" id="code" name="code" placeholder="Nhập mã gồm 5 chữ số" required>
     </div>
     <button type="submit" class="btn btn-primary btn-block">Verify</button>
     <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
@@ -50,9 +50,8 @@
 
   <p th:if="${message}" class="text-success text-center mt-3" th:text="${message}"></p>
 
-  <!-- Resend Button -->
   <form th:action="@{/verify/resend}" method="post" class="text-center mt-3">
-    <button type="submit" class="btn btn-link">Didn’t receive the email? Resend</button>
+    <button type="submit" class="btn btn-link">Bạn không nhận được email? Gửi lại</button>
   </form>
 </div>
 </body>

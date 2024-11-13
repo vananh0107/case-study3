@@ -2,7 +2,6 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.UserLoginDTO;
 import com.example.backend.dto.UserRegisterDTO;
-import com.example.backend.pojo.User;
 import com.example.backend.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -36,9 +35,9 @@ public class AuthController {
             return "register";
         }
 
-        model.addAttribute("message", "Registration successful! Please check your email for a verification code.");
+        model.addAttribute("message", "Đăng ký thành công! Kiểm tra email của bạn.");
         userService.save(userDTO);
-        session.setAttribute("userEmail", userDTO.getUsername());
+        session.setAttribute("username", userDTO.getUsername());
         return "redirect:/verify";
     }
 
