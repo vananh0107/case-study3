@@ -26,5 +26,4 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment,Integer> 
 
     List<Enrollment> findByRegistrationDateBetweenAndActive(LocalDate startDate, LocalDate endDate, boolean active);
 
-    List<Enrollment> findByStudent(User student);
 }

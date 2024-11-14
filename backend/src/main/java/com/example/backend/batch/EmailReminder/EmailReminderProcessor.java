@@ -26,9 +26,7 @@ public class EmailReminderProcessor implements ItemProcessor<Object, Map<String,
             Course course = (Course) item;
             emailData.put("to", "all_students");
             emailData.put("subject", "Nhắc nhở: Khóa học " + course.getName() + " cần thêm học viên");
-            emailData.put("body", "Khóa học " + course.getName() + " vẫn đang mở đăng ký và cần thêm học viên.\n"
-                    + "Vui lòng cân nhắc đăng ký vào khóa học này sớm.\n\n"
-                    + "Trân trọng,\nĐại học ABC");
+            emailData.put("body",  course.getName());
         }
         return emailData;
     }

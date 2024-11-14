@@ -26,6 +26,8 @@ public class EmailReminderWriter implements ItemWriter<Map<String, String>> {
 
     @Override
     public void write(Chunk<? extends Map<String, String>> chunk) {
+        String courseLowStudentSubject="Các lớp còn trống";
+        String courseLowStudentBody="Các lớp sau vã chưa đủ học sinh hãy nhanh tay đăng ký" + '\n';
         for (Map<String, String> emailData : chunk) {
             String recipient = emailData.get("to");
             String subject = emailData.get("subject");
@@ -33,12 +35,13 @@ public class EmailReminderWriter implements ItemWriter<Map<String, String>> {
 
             if (isValidEmailData(subject, body)) {
                 if ("all_students".equals(recipient)) {
-                    sendEmailToAllStudents(subject, body);
+                    courseLowStudentBody = courseLowStudentBody + body+'\n';
                 } else {
                     sendEmail(recipient, subject, body);
                 }
             }
         }
+        sendEmailToAllStudents(courseLowStudentSubject,courseLowStudentBody);
     }
 
     private boolean isValidEmailData(String subject, String body) {

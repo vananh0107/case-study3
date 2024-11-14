@@ -1,6 +1,5 @@
 package com.example.backend.security;
 
-import com.example.backend.pojo.User;
 import com.example.backend.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

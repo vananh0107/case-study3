@@ -20,7 +20,7 @@ public class WeeklyScheduler {
     @Autowired
     private Job weeklyReminderJob;
 
-    @Scheduled(cron = "0 37 14 ? * MON")
+    @Scheduled(cron = "0 50 15 * * 4")
     public void runWeeklyReport() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()

@@ -2,10 +2,11 @@ package com.example.backend.batch.CourseRegister;
 
 import com.example.backend.pojo.Course;
 import com.example.backend.pojo.Enrollment;
+import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
-
+@Data
 public class DataReader {
     private LocalDate startDate;
     private LocalDate endDate;
@@ -19,8 +20,4 @@ public class DataReader {
         this.enrollments = enrollments;
     }
 
-    public LocalDate getStartDate() { return startDate; }
-    public LocalDate getEndDate() { return endDate; }
-    public List<Course> getAllCourses() { return allCourses; }
-    public List<Enrollment> getEnrollments() { return enrollments; }
 }
